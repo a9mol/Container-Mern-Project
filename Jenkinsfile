@@ -16,17 +16,21 @@ pipeline {
                 sh 'npm test || echo "No tests yet"'
             }
         }
-        stage('Docker Build') {
+        stage('Docker Build & Push') {
             steps {
-                sh 'docker build -t container-mern-project:latest .'
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-pass') {
+                        def app = docker.build("1000014838/container-mern-project:latest")
+                        app.push()
+                    }
+                }
             }
         }
         stage('Deploy') {
             steps {
                 echo "Simulating Deployment..."
-                sh 'docker run -d -p 3000:3000 container-mern-project:latest'
+                sh 'docker run -d -p 3000:3000 1000014838/container-mern-project:latest'
             }
         }
     }
 }
-
